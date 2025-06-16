@@ -1,5 +1,6 @@
 # Password Strength Checker (React)
 
+![alt text](https://github.com/Ubuntu-Dekiru/PRODIGY_CS_03/blob/main/screenshots/Screenshot%202025-06-16%20171625.png)
 A simple, real-time password strength checker built with React and Tailwind CSS. This tool provides instant feedback on password complexity based on criteria such as length, presence of uppercase and lowercase letters, numbers, and special characters.
 
 # ✨ Features
