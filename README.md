@@ -25,10 +25,9 @@ Make sure you have the following installed:
 
 # Installation
 1. *Clone the repository:*
-`git clone https://github.com/your-username/password-strength-checker.git
-cd password-strength-checker`
+`git clone https://github.com/Ubuntu-Dekiru/PRODIGY_CS_03/
+cd PRODIGY_CS_03`
 
-(Replace `your-username/password-strength-checker` with your actual GitHub repository link)
 2. *Install dependencies:*
 `npm install
 OR
