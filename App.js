@@ -1,184 +1,142 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Main App component
+// Main App component for the password strength checker
 const App = () => {
-  // State for the password input
+  // State to store the current password input by the user
   const [password, setPassword] = useState('');
-  // State for the strength score (0-5)
-  const [strengthScore, setStrengthScore] = useState(0);
-  // State for feedback messages
+  // State to store the strength score of the password
+  const [strength, setStrength] = useState(0);
+  // State to store feedback messages for each criteria
   const [feedback, setFeedback] = useState([]);
-  // Ref for the password input field
-  const passwordInputRef = useRef(null);
 
-  // Effect hook to focus the input field on component mount
-  useEffect(() => {
-    if (passwordInputRef.current) {
-      passwordInputRef.current.focus();
-    }
-  }, []);
-
-  // Effect hook to assess password strength whenever the password changes
+  // useEffect hook to re-evaluate password strength whenever the password changes
   useEffect(() => {
     assessPasswordStrength(password);
-  }, [password]);
+  }, [password]); // Dependency array ensures this runs only when 'password' changes
 
-  /**
-   * Assesses the strength of the given password based on multiple criteria.
-   * Updates the strength score and feedback messages.
-   * @param {string} pwd The password string to assess.
-   */
+  // Function to assess the password strength based on defined criteria
   const assessPasswordStrength = (pwd) => {
-    let score = 0;
-    const feedbackMessages = [];
+    let newStrength = 0; // Initialize strength score
+    const newFeedback = []; // Initialize feedback messages array
 
-    // Criteria checks
-    const hasLowercase = /[a-z]/.test(pwd);
-    const hasUppercase = /[A-Z]/.test(pwd);
-    const hasNumber = /[0-9]/.test(pwd);
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd);
-
-    // 1. Length
+    // 1. Length criteria: At least 8 characters
     if (pwd.length >= 8) {
-      score += 1;
-      feedbackMessages.push('Length: At least 8 characters (Good)');
+      newStrength += 1; // Increment strength if criteria met
+      newFeedback.push({ text: 'Length: At least 8 characters - Met', met: true });
     } else {
-      feedbackMessages.push(`Length: Password is too short (${pwd.length}/8 characters)`);
+      newFeedback.push({ text: 'Length: At least 8 characters - Not Met', met: false });
     }
 
-    if (pwd.length >= 12) {
-      score += 1;
-      feedbackMessages.push('Length: Over 12 characters (Excellent)');
+    // 2. Uppercase letters criteria: At least one uppercase letter
+    if (/[A-Z]/.test(pwd)) {
+      newStrength += 1;
+      newFeedback.push({ text: 'Uppercase: At least one uppercase letter - Met', met: true });
+    } else {
+      newFeedback.push({ text: 'Uppercase: At least one uppercase letter - Not Met', met: false });
     }
 
-    // 2. Character types
-    let charTypeCount = 0;
-    if (hasLowercase) {
-      charTypeCount++;
-      feedbackMessages.push('Contains: Lowercase letters');
+    // 3. Lowercase letters criteria: At least one lowercase letter
+    if (/[a-z]/.test(pwd)) {
+      newStrength += 1;
+      newFeedback.push({ text: 'Lowercase: At least one lowercase letter - Met', met: true });
     } else {
-      feedbackMessages.push('Missing: Lowercase letters');
-    }
-    if (hasUppercase) {
-      charTypeCount++;
-      feedbackMessages.push('Contains: Uppercase letters');
-    } else {
-      feedbackMessages.push('Missing: Uppercase letters');
-    }
-    if (hasNumber) {
-      charTypeCount++;
-      feedbackMessages.push('Contains: Numbers');
-    } else {
-      feedbackMessages.push('Missing: Numbers');
-    }
-    if (hasSpecialChar) {
-      charTypeCount++;
-      feedbackMessages.push('Contains: Special characters');
-    } else {
-      feedbackMessages.push('Missing: Special characters');
+      newFeedback.push({ text: 'Lowercase: At least one lowercase letter - Not Met', met: false });
     }
 
-    // Add score based on character types diversity
-    if (charTypeCount >= 3) {
-      score += 1;
-    }
-    if (charTypeCount === 4) {
-      score += 1;
-    }
-
-    // Penalize for common patterns or simple sequences (basic check)
-    // This is a very simple check and can be expanded for more robust analysis.
-    if (/(123|abc|password|qwerty)/i.test(pwd)) {
-        score = Math.max(0, score - 1); // Decrease score, but not below 0
-        feedbackMessages.push('Warning: Avoid common patterns like "123", "abc", or "password"');
+    // 4. Numbers criteria: At least one number
+    if (/\d/.test(pwd)) {
+      newStrength += 1;
+      newFeedback.push({ text: 'Numbers: At least one number - Met', met: true });
+    } else {
+      newFeedback.push({ text: 'Numbers: At least one number - Not Met', met: false });
     }
 
-    setStrengthScore(score);
-    setFeedback(feedbackMessages);
+    // 5. Special characters criteria: At least one special character
+    // Regex for common special characters: !@#$%^&*()_+{}[]:;<>,.?~\\-=/
+    if (/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(pwd)) {
+      newStrength += 1;
+      newFeedback.push({ text: 'Special Characters: At least one special character - Met', met: true });
+    } else {
+      newFeedback.push({ text: 'Special Characters: At least one special character - Not Met', met: false });
+    }
+
+    // Update the state variables
+    setStrength(newStrength);
+    setFeedback(newFeedback);
   };
 
-  /**
-   * Returns the color class for the strength indicator based on the score.
-   * @param {number} score The current strength score.
-   * @returns {string} Tailwind CSS class for background color.
-   */
-  const getStrengthColor = (score) => {
-    if (score === 0) return 'bg-gray-400'; // Very Weak (default)
-    if (score === 1) return 'bg-red-500';  // Weak
-    if (score === 2) return 'bg-orange-500'; // Moderate
-    if (score === 3) return 'bg-yellow-500'; // Good
-    if (score >= 4) return 'bg-green-500'; // Strong
-    return 'bg-gray-400';
-  };
-
-  /**
-   * Returns the text description for the strength.
-   * @param {number} score The current strength score.
-   * @returns {string} Text description of strength.
-   */
-  const getStrengthText = (score) => {
-    if (score === 0) return 'Very Weak';
-    if (score === 1) return 'Weak';
-    if (score === 2) return 'Moderate';
-    if (score === 3) return 'Good';
+  // Determine the overall strength message based on the score
+  const getStrengthMessage = (score) => {
+    if (score === 5) return 'Very Strong';
     if (score >= 4) return 'Strong';
-    return 'Enter a password';
+    if (score >= 3) return 'Moderate';
+    if (score >= 1) return 'Weak';
+    return 'Very Weak';
+  };
+
+  // Determine the color for the strength indicator based on the score
+  const getStrengthColor = (score) => {
+    if (score === 5) return 'bg-green-500'; // Very Strong
+    if (score >= 4) return 'bg-lime-500';   // Strong
+    if (score >= 3) return 'bg-yellow-500'; // Moderate
+    if (score >= 1) return 'bg-orange-500'; // Weak
+    return 'bg-red-500'; // Very Weak
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center p-4 font-inter">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md border border-gray-200">
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">
-          Password Strength Checker
-        </h1>
+    // Main container for the application, centered and styled with Tailwind
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-sans">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Password Strength Checker</h1>
 
+        {/* Password input field */}
         <div className="mb-6">
           <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">
-            Enter your password:
+            Enter Password:
           </label>
           <input
-            ref={passwordInputRef}
             type="password"
             id="password"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-gray-900"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
             placeholder="Type your password here..."
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            aria-label="Password input"
+            onChange={(e) => setPassword(e.target.value)} // Update password state on input change
           />
         </div>
 
-        {/* Strength Indicator */}
+        {/* Strength indicator bar */}
         <div className="mb-6">
-          <p className="text-sm font-semibold text-gray-700 mb-2">Password Strength:</p>
-          <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-300 ease-in-out ${getStrengthColor(strengthScore)}`}
-              style={{ width: `${(strengthScore / 5) * 100}%` }}
-              role="progressbar"
-              aria-valuenow={strengthScore}
-              aria-valuemin="0"
-              aria-valuemax="5"
+              className={`h-full rounded-full transition-all duration-300 ease-in-out ${getStrengthColor(strength)}`}
+              style={{ width: `${(strength / 5) * 100}%` }} // Calculate width based on score out of 5
             ></div>
           </div>
-          <p className={`text-right text-sm mt-1 font-semibold ${getStrengthColor(strengthScore).replace('bg', 'text')}`}>
-            {getStrengthText(strengthScore)}
+          <p className={`text-center text-sm font-medium ${getStrengthColor(strength).replace('bg-', 'text-')}`}>
+            Strength: {getStrengthMessage(strength)}
           </p>
         </div>
 
-        {/* Feedback Section */}
-        {password && ( // Only show feedback when password is not empty
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h2 className="text-lg font-bold text-blue-800 mb-3">Feedback:</h2>
-            <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
-              {feedback.map((msg, index) => (
-                <li key={index} className={msg.startsWith('Missing') || msg.startsWith('Warning') ? 'text-red-600' : 'text-gray-700'}>
-                  {msg}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Feedback section */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Feedback:</h2>
+          <ul className="space-y-2">
+            {feedback.map((item, index) => (
+              <li key={index} className={`flex items-center text-md ${item.met ? 'text-green-600' : 'text-red-600'}`}>
+                {item.met ? (
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                )}
+                {item.text}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
