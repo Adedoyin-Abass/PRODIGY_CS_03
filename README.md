@@ -24,11 +24,11 @@ Make sure you have the following installed:
   * npm (comes with Node.js) or Yarn
 
 # Installation
-1. *Clone the repository:*
+1. **Clone the repository:**
 `git clone https://github.com/Ubuntu-Dekiru/PRODIGY_CS_03/
 cd PRODIGY_CS_03`
 
-2. *Install dependencies:*
+2. **Install dependencies:**
 `npm install
 OR
 yarn install`
