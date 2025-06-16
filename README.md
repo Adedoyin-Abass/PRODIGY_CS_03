@@ -31,12 +31,12 @@ cd password-strength-checker`
 (Replace `your-username/password-strength-checker` with your actual GitHub repository link)
 2. *Install dependencies:*
 `npm install
-# OR
+OR
 yarn install`
 
 3. *Start the development server:*
 `npm start
-# OR
+OR
 yarn start`
 
 This will open the application in your default web browser at `http://localhost:3000`.
